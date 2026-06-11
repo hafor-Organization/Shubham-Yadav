@@ -30,7 +30,6 @@ export default function Navbar() {
     <header
       className="
    fixed
-   min-h-svh
    top-0
    left-0
    right-0

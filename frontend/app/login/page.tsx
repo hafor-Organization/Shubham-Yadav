@@ -1,163 +1,184 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Eye, EyeOff, BriefcaseBusiness } from "lucide-react";
 
+import api from "@/lib/api";
+
 export default function LoginPage() {
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
 
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const [error, setError] = useState("");
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setError("");
+
+    try {
+      setLoading(true);
+
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      localStorage.setItem("token", response.data.token);
+
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      router.push("/dashboard");
+    } catch (error: any) {
+      setError(error.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <>
-      {""}
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="relative flex items-center justify-center overflow-hidden">
-          {/* Background Glows */}
-          <div className="absolute left-10 top-10 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />
-          <div className="absolute bottom-10 right-10 h-48 w-48 rounded-full bg-violet-500/10 blur-3xl" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#050816] px-6">
+      <div className="absolute left-20 top-32 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl" />
+      <div className="absolute bottom-20 right-20 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl" />
 
-          <div className="relative z-10 flex h-full w-full items-center justify-between gap-8 px-12">
-            {/* Left Side */}
-            <div className="flex-1 max-w-[420px]">
-              <div className="mb-4 flex items-center gap-2.5">
-                <div className="rounded-lg bg-gradient-to-r from-blue-500 to-violet-500 p-2">
-                  <BriefcaseBusiness size={18} className="text-white" />
-                </div>
-
-                <h1 className="text-xl font-bold text-white">
-                  Intern
-                  <span className="text-blue-500">AI</span>
-                </h1>
-              </div>
-
-              <h2 className="mb-3 text-3xl font-bold leading-tight tracking-tight text-white">
-                Find Your Dream Internship
-              </h2>
-
-              <p className="mb-5 text-xs leading-relaxed text-slate-400">
-                Discover personalized internship opportunities powered by AI
-                recommendations.
-              </p>
-
-              <div className="grid grid-cols-2 gap-x-2 gap-y-2.5 text-xs font-medium text-slate-300">
-                <div>✓ 5000+ Internships</div>
-                <div>✓ AI Recommendations</div>
-                <div>✓ Top Hiring Companies</div>
-                <div>✓ Resume Matching</div>
-              </div>
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between gap-16">
+        {/* Left Side */}
+        <div className="hidden max-w-xl flex-1 md:block">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 p-3">
+              <BriefcaseBusiness size={22} className="text-white" />
             </div>
 
-            {/* Right Side Login */}
-            <div className="w-[380px] shrink-0">
-              <div className="rounded-2xl bg-white/5 p-5 backdrop-blur-xl">
-                <div className="mb-4">
-                  <h2 className="text-xl font-bold text-white">
-                    Welcome Back 👋
-                  </h2>
+            <div>
+              <h1 className="text-2xl font-bold text-white">
+                Intern
+                <span className="text-blue-500">AI</span>
+              </h1>
 
-                  <p className="mt-0.5 text-[11px] text-slate-400">
-                    Sign in to continue your journey.
-                  </p>
-                </div>
+              <p className="text-sm text-slate-400">Find. Match. Grow.</p>
+            </div>
+          </div>
 
-                <form
-                  className="space-y-3"
-                  onSubmit={(e) => e.preventDefault()}
-                >
-                  <div>
-                    <label className="mb-1 block text-[11px] font-medium text-slate-300">
-                      Email
-                    </label>
+          <h2 className="mb-4 text-5xl font-bold leading-tight text-white">
+            Find Your Dream
+            <span className="block bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text text-transparent">
+              Internship
+            </span>
+          </h2>
 
-                    <input
-                      type="email"
-                      placeholder="you@example.com"
-                      className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-xs text-white outline-none transition focus:border-blue-500"
-                    />
-                  </div>
+          <p className="mb-8 text-lg leading-relaxed text-slate-400">
+            Discover personalized internship opportunities powered by AI
+            recommendations and get matched with top companies.
+          </p>
 
-                  <div>
-                    <label className="mb-1 block text-[11px] font-medium text-slate-300">
-                      Password
-                    </label>
+          <div className="grid grid-cols-2 gap-4 text-sm text-slate-300">
+            <div>✓ 5000+ Internships</div>
+            <div>✓ AI Recommendations</div>
+            <div>✓ Top Hiring Companies</div>
+            <div>✓ Resume Matching</div>
+          </div>
+        </div>
 
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter password"
-                        className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 pr-9 text-xs text-white outline-none transition focus:border-blue-500"
-                      />
+        {/* Login Card */}
+        <div className="w-full max-w-md">
+          <div className="rounded-3xl border border-slate-800 bg-slate-950/60 p-8 backdrop-blur-2xl">
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
 
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-2.5 text-slate-400 transition hover:text-slate-200"
-                      >
-                        {showPassword ? (
-                          <EyeOff size={14} />
-                        ) : (
-                          <Eye size={14} />
-                        )}
-                      </button>
-                    </div>
-                  </div>
+              <p className="mt-2 text-sm text-slate-400">
+                Access your personalized internship dashboard.
+              </p>
+            </div>
 
-                  <div className="flex items-center justify-between text-[11px]">
-                    <label className="flex cursor-pointer select-none items-center gap-1.5 text-slate-400">
-                      <input type="checkbox" className="accent-blue-500" />
-                      Remember me
-                    </label>
+            <form className="space-y-5" onSubmit={handleLogin}>
+              <div>
+                <label className="mb-2 block text-sm text-slate-300">
+                  Email
+                </label>
 
-                    <Link
-                      href="/forgot-password"
-                      className="font-medium text-blue-500 hover:text-blue-400"
-                    >
-                      Forgot Password?
-                    </Link>
-                  </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm text-slate-300">
+                  Password
+                </label>
+
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter password"
+                    className="w-full rounded-2xl border border-slate-700 bg-slate-900/60 px-4 py-3 pr-12 text-sm text-white outline-none focus:border-blue-500"
+                  />
 
                   <button
-                    type="submit"
-                    className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-violet-600 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-3.5 text-slate-400"
                   >
-                    Sign In
-                  </button>
-                </form>
-
-                <div className="my-3 flex items-center gap-3">
-                  <div className="h-px flex-1 bg-slate-800" />
-
-                  <span className="text-[10px] font-bold tracking-wider text-slate-500">
-                    OR
-                  </span>
-
-                  <div className="h-px flex-1 bg-slate-800" />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <button className="rounded-lg bg-slate-900/40 py-2 text-[11px] text-white transition hover:bg-slate-800">
-                    Google
-                  </button>
-
-                  <button className="rounded-lg bg-slate-900/40 py-2 text-[11px] text-white transition hover:bg-slate-800">
-                    GitHub
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-
-                <p className="mt-4 text-center text-[11px] text-slate-400">
-                  Don't have an account?{" "}
-                  <Link
-                    href="/signup"
-                    className="font-medium text-blue-500 hover:underline"
-                  >
-                    Sign Up
-                  </Link>
-                </p>
               </div>
+
+              {error && <p className="text-sm text-red-500">{error}</p>}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 py-3 text-sm font-semibold text-white"
+              >
+                {loading ? "Signing In..." : "Sign In →"}
+              </button>
+            </form>
+
+            <div className="my-6 flex items-center gap-4">
+              <div className="h-px flex-1 bg-slate-800" />
+
+              <span className="text-xs text-slate-500">OR</span>
+
+              <div className="h-px flex-1 bg-slate-800" />
             </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button className="rounded-2xl border border-slate-700 bg-slate-900/40 py-3 text-sm text-white transition hover:bg-slate-800">
+                Google
+              </button>
+
+              <button className="rounded-2xl border border-slate-700 bg-slate-900/40 py-3 text-sm text-white transition hover:bg-slate-800">
+                GitHub
+              </button>
+            </div>
+
+            <p className="mt-6 text-center text-sm text-slate-400">
+              Don't have an account?{" "}
+              <Link
+                href="/signup"
+                className="font-medium text-blue-500 hover:underline"
+              >
+                Sign Up
+              </Link>
+            </p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
