@@ -1,4 +1,5 @@
 const Internship = require("../models/Internship");
+const { fetchRemoteJobs } = require("../services/remoteJobService");
 
 exports.getAllInternships = async (req, res) => {
   try {
@@ -107,6 +108,23 @@ exports.searchInternships = async (req, res) => {
     res.json({
       success: true,
       internships,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+// Get RemoteOK Jobs
+exports.getRemoteJobs = async (req, res) => {
+  try {
+    const jobs = await fetchRemoteJobs();
+
+    res.status(200).json({
+      success: true,
+      count: jobs.length,
+      jobs,
     });
   } catch (error) {
     res.status(500).json({
